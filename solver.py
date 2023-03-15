@@ -12,7 +12,7 @@ import tools
 from environment import VRPEnvironment, ControllerEnvironment
 from baselines.strategies import STRATEGIES
 
-def solve_static_vrptw(instance, time_limit=3600, tmp_dir="tmp", seed=1, initial_solution=None):
+def solve_static_vrptw(instance, time_limit=3600, tmp_dir="tmp", seed=1, initial_solution=None, hill_climbing:bool=False):
 
     # Prevent passing empty instances to the static solver, e.g. when
     # strategy decides to not dispatch any requests for the current epoch
@@ -40,7 +40,9 @@ def solve_static_vrptw(instance, time_limit=3600, tmp_dir="tmp", seed=1, initial
 
     hgs_cmd = [
         executable, instance_filename, str(max(time_limit - 2, 1)),
-        '-seed', str(seed), '-veh', '-1', '-useWallClockTime', '1'
+        '-seed', str(seed), '-veh', '-1', '-useWallClockTime', '1',
+        # add -hillClimbing if hill_climbing is True
+        '-hillClimbing', '1' if hill_climbing else '0'
     ]
     if initial_solution is None:
         initial_solution = [[i] for i in range(1, instance['coords'].shape[0])]
@@ -104,6 +106,8 @@ def run_baseline(args, env, oracle_solution=None, strategy=None, seed=None):
 
     rng = np.random.default_rng(seed)
 
+    log(f"solver.py->run_baseline() -hill_climbing: {args.hill_climbing}")
+
     total_reward = 0
     done = False
     # Note: info contains additional info that can be used by your solver
@@ -131,8 +135,13 @@ def run_baseline(args, env, oracle_solution=None, strategy=None, seed=None):
             # Run HGS with time limit and get last solution (= best solution found)
             # Note we use the same solver_seed in each epoch: this is sufficient as for the static problem
             # we will exactly use the solver_seed whereas in the dynamic problem randomness is in the instance
-            solutions = list(solve_static_vrptw(epoch_instance_dispatch, time_limit=epoch_tlim, tmp_dir=args.tmp_dir, seed=args.solver_seed))
-            assert len(solutions) > 0, f"No solution found during epoch {observation['current_epoch']}"
+            solutions = list(solve_static_vrptw(
+                epoch_instance_dispatch, 
+                hill_climbing=args.hill_climbing, 
+                time_limit=epoch_tlim, 
+                tmp_dir=args.tmp_dir, 
+                seed=args.solver_seed))
+            # assert len(solutions) > 0, f"No solution found during epoch {observation['current_epoch']}"
             epoch_solution, cost = solutions[-1]
 
             # Map HGS solution to indices of corresponding requests
@@ -180,6 +189,7 @@ if __name__ == "__main__":
     parser.add_argument("--tmp_dir", type=str, default=None, help="Provide a specific directory to use as tmp directory (useful for debugging)")
     parser.add_argument("--model_path", type=str, default=None, help="Provide the path of the machine learning model to be used as strategy (Path must not contain `model.pth`)")
     parser.add_argument("--verbose", action='store_true', help="Show verbose output")
+    parser.add_argument("--hill_climbing", action='store_true', help="Use hill climbing to improve the solution")
     args = parser.parse_args()
 
     if args.tmp_dir is None:

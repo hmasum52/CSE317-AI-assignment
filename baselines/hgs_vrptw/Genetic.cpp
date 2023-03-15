@@ -10,6 +10,18 @@
 #include "LocalSearch.h"
 #include "Individual.h"
 
+void Genetic::hill_climbing(){
+	// Generate an inital solution
+	Individual *initial_soln = population->getBestFound();
+	
+	/* LOCAL SEARCH */
+	//Generate a new solution by making a small change to the current solution
+	localSearch->run(initial_soln, params->penaltyCapacity, params->penaltyTimeWarp);
+	
+	// add to population(best solution from the population is exported in main.cpp)
+	population->addIndividual(initial_soln, true);
+}
+
 void Genetic::run(int maxIterNonProd, int timeLimit)
 {
 	if (params->nbClients == 1)

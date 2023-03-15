@@ -65,6 +65,7 @@ public:
 		int nbIter = 20000;				// Number of iterations without improvement until termination. Default value: 20,000 iterations
 		int timeLimit = INT_MAX;		// CPU time limit until termination in seconds. Default value: infinity
 		bool useWallClockTime = false;  // If True, measure wall clock time rather than CPU time
+		bool hillClimbing = false;		// If True, use hill climbing instead of HGS
 		std::string pathBKS = "";		// Path to Best Known Solution
 
 		// Parameters for the Construction Heuristics

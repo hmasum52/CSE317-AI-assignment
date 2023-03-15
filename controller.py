@@ -29,6 +29,7 @@ if __name__ == "__main__":
 
     # Load instance
     static_instance = tools.read_vrplib(args.instance)
+    print(f"loaded instance {args.instance.split('/')[-1]}")
 
     # Create environment
     env = VRPEnvironment(args.instance_seed, static_instance, args.epoch_tlim, args.static)
@@ -82,6 +83,6 @@ if __name__ == "__main__":
     assert done, "Environment is not finished"
     # Write results
     print(f"------ Controller ------")
-    print(f"Cost of solution: {sum(env.final_costs.values())}")
-    print("Solution:")
-    print(tools.json_dumps_np(env.final_solutions))
+    print(f"Cost of solution: {sum(env.final_costs.values())}\n")
+    # print("Solution:")
+    # print(tools.json_dumps_np(env.final_solutions))

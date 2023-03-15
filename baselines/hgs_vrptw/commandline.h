@@ -77,6 +77,8 @@ public:
 					config.timeLimit = atoi(argv[i + 1]);
 				else if (std::string(argv[i]) == "-useWallClockTime")
 					config.useWallClockTime = atoi(argv[i + 1]) != 0;
+				else if (std::string(argv[i]) == "-hillClimbing")
+					config.hillClimbing = atoi(argv[i + 1]) != 0;
 				else if (std::string(argv[i]) == "-it")
 					config.nbIter = atoi(argv[i + 1]);
 				else if (std::string(argv[i]) == "-bks")
